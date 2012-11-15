@@ -4,4 +4,11 @@
 <body>
   <h1>Welcome to automaton.meteor.com</h1>
   <h3>We're working on something awesome, but it's not done yet.</h3>
+  <h3>
+    {{#if currentUser}}
+      <span class="green">Welcome back, {{loginButtons}}</span>
+    {{else}}
+      <span class="red">{{loginButtons}}  to save your work</span>
+    {{/if}}
+  </h3>
 </body>

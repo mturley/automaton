@@ -48,23 +48,28 @@
     <div class="row-fluid">
       <div class="span3">
         <div class="well sidebar-nav">
-          <ul class="nav nav-list">
+          <ul class="nav nav-list" id="myautomata">
             <li class="nav-header">My Automata</li>
-            <li>There's nothing here...</li>
-            <!--<li class="active"><a href="#">Link</a></li>
-            <li><a href="#">Link</a></li>
-            <li><a href="#">Link</a></li>
-            <li><a href="#">Link</a></li>-->
+            {{#each myautomata}}
+              <li{{#if isActiveGraph}} class="active"{{/if}}><a href="#">{{title}}</a></li>
+            {{/each}}
           </ul>
         </div><!--/.well -->
       </div><!--/span-->
       <div class="span9">
         <div class="hero-unit" align="center">
-          <h1>Welcome!</h1>
-          <br><br>
-          <p>It doesn't look like you have any saved Automata.  Start by creating a new one.</p>
-          <br><br>
-          <p><a class="btn btn-primary btn-large button_new-automaton">New Automaton &raquo;</a></p>
+          {{#if activeGraphExists}}
+            <h1>Edit Graph</h1>
+            <br>
+            <h2>{{activeGraph._id}}</h2>
+            <h2>{{activeGraph.title}}</h2>
+          {{else}}
+            <h1>Welcome!</h1>
+            <br><br>
+            <p>Please select a saved automaton from the left to work on it, or create a new one.</p>
+            <br><br>
+            <p><a class="btn btn-primary btn-large button_new-automaton">New Automaton &raquo;</a></p>
+          {{/if}}
         </div>
       </div><!--/span-->
     </div><!--/row-->

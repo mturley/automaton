@@ -38,3 +38,31 @@ li.active .delete-icon:hover, .delete-icon:hover {
 .delete-icon:active {
   opacity: 1.0;
 }
+
+h2.editable-title:hover .content {
+  text-decoration: underline;
+  color: gray;
+  cursor: text;
+}
+h2.editable-title .edit-icon {
+  background: url('/img/glyphicons_150_edit.png');
+  background-size: 24px 21px;
+  width: 24px;
+  height: 21px;
+  display: inline-block;
+  opacity: 0.2;
+  cursor: pointer;
+}
+h2.editable-title:hover .edit-icon {
+  opacity: 0.5;
+}
+h2.editable-title:active .edit-icon {
+  opacity: 1.0
+}
+
+h2.editable-title .content.editing {
+  color: black;
+  background-color: white;
+  padding: 3px;
+  border: 1px solid gray;
+}

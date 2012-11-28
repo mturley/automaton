@@ -8,7 +8,6 @@ var UrlRouter = Backbone.Router.extend({
   },
   edit: function(graph_id) {
     fn.setActiveGraph(graph_id);
-    console.log("STUFF WITH id ",graph_id);
   }
 });
 var Router = new UrlRouter;
@@ -71,13 +70,28 @@ Template.body.events({
   'click #myautomata li .delete-icon' : function() {
     Session.set('dialogContextGraph', this._id)
     $('#confirm-delete-dialog').modal('show');
+  },
+  'click .editable-title' : function() {
+    var $titleBox = $('.editable-title .content');
+    $titleBox.addClass('editing').attr('contenteditable','true');
+    $('.editable-title')
+    var saveTitle = function() {
+      $titleBox.off('blur.editing keyup.editing');
+      $titleBox.removeClass('editing').removeAttr('contenteditable');
+      var title = $titleBox.text();
+      Graphs.update({ '_id' : Session.get('activeGraph') },{ 'title' : title });
+    }
+    $titleBox.on('blur.editing', saveTitle);
+    $titleBox.on('keyup.editing', function(event) {
+      if(event.keyCode === 13) saveTitle();
+    });
   }
 });
 
 Template.hiddenElements.events({
   'click #confirm-delete-dialog .btn-danger' : function() {
     var g = Session.get('dialogContextGraph');
-    Graphs.remove({'_id':g});
+    Graphs.remove({ '_id' : g });
     if(Session.get('activeGraph') == g)
       fn.setActiveGraph(null);
     $('#confirm-delete-dialog').modal('hide');

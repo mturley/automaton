@@ -65,8 +65,11 @@
       <div class="span9">
         <div class="hero-unit" align="center">
           {{#if activeGraphExists}}
-            <h2>{{activeGraph.title}}</h2>
-            <br>
+            <h2 class="editable-title">
+              <span class="content">{{activeGraph.title}}</span>
+              <i class="edit-icon" title="Rename"></i>
+            </h2>
+            <br />
           {{else}}
             <h1>Welcome!</h1>
             <br><br>

@@ -15,6 +15,7 @@
 
 <body>
   {{> body}}
+  {{> hiddenElements}}
 </body>
 
 <template name="body">
@@ -30,7 +31,7 @@
         <div class="nav-collapse collapse">
           <p class="navbar-text pull-right">
             {{#if currentUser}}
-              Welcome back, {{loginButtons}}  You have 0 Saved Automata
+              Welcome back, {{loginButtons}}  You have {{numSavedAutomata}} Saved Automata
             {{else}}
               {{loginButtons}} to automatically save your work
             {{/if}}
@@ -51,7 +52,10 @@
           <ul class="nav nav-list" id="myautomata">
             <li class="nav-header">My Automata</li>
             {{#each myautomata}}
-              <li{{#if isActiveGraph}} class="active"{{/if}}><a href="#">{{title}}</a></li>
+              <li{{#if isActiveGraph}} class="active"{{/if}}>
+                <a href="#">{{title}}</a>
+                <i class="delete-icon" title="Delete Automaton"></i>
+              </li>
             {{else}}
               <li>There's nothing here...</l1>
             {{/each}}
@@ -61,12 +65,8 @@
       <div class="span9">
         <div class="hero-unit" align="center">
           {{#if activeGraphExists}}
-            <h1>Edit Graph</h1>
-            <h3>There will eventually be a graph editor here, and a big shiny simulate button.  Until then, enjoy the GUID of this automaton's row in the database:</h3>
-            <h2>{{activeGraph._id}}</h2>
             <h2>{{activeGraph.title}}</h2>
             <br>
-            <p><a class="btn btn-secondary btn-small button_delete-automaton">Delete this Automaton</a></p>
           {{else}}
             <h1>Welcome!</h1>
             <br><br>
@@ -85,4 +85,20 @@
     </footer>
 
   </div><!--/.fluid-container-->
+</template>
+
+<template name="hiddenElements">
+  <div id="confirm-delete-dialog" class="modal hide fade">
+    <div class="modal-header">
+      <h3>Delete Automaton</h3>
+    </div>
+    <div class="modal-body">
+      <p>You are about to delete a saved automaton.  This is irreversible.</p>
+      <p>Do you want to proceed?</p>
+    </div>
+    <div class="modal-footer">
+      <a href="#" class="btn btn-danger">Yes, Delete this Automaton</a>
+      <a href="#" class="btn btn-secondary">No</a>
+    </div>
+  </div>
 </template>

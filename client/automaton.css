@@ -14,3 +14,27 @@ body {
 .sidebar-nav {
   padding: 9px 0;
 }
+
+.delete-icon {
+  background: url('/img/glyphicons_016_bin.png');
+  background-size: 12px 18px;
+  width: 12px;
+  height: 18px;
+  float: right;
+  position: relative;
+  top: -22px;
+  opacity: 0;
+  cursor: pointer;
+}
+
+li.active .delete-icon {
+  opacity: 0.5;
+}
+
+li.active .delete-icon:hover, .delete-icon:hover {
+  opacity: 0.8;
+}
+
+.delete-icon:active {
+  opacity: 1.0;
+}

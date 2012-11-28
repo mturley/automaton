@@ -48,7 +48,7 @@ Template.body.activeGraph = function() {
 };
 
 Template.body.numSavedAutomata = function() {
-  return Graphs.count({'_id':Session.get('activeGraph')});
+  return Graphs.find({'_id':Session.get('activeGraph')}).count();
 };
 
 Template.body.events({

@@ -52,6 +52,8 @@
             <li class="nav-header">My Automata</li>
             {{#each myautomata}}
               <li{{#if isActiveGraph}} class="active"{{/if}}><a href="#">{{title}}</a></li>
+            {{else}}
+              <li>There's nothing here...</l1>
             {{/each}}
           </ul>
         </div><!--/.well -->
@@ -63,6 +65,8 @@
             <br>
             <h2>{{activeGraph._id}}</h2>
             <h2>{{activeGraph.title}}</h2>
+            <br>
+            <p><a class="btn btn-secondary btn-small button_delete-automaton">Delete this Automaton</a></p>
           {{else}}
             <h1>Welcome!</h1>
             <br><br>

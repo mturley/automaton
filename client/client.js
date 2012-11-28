@@ -15,6 +15,12 @@ Template.body.events({
     } else {
       Session.set('activeGraph',null);
     }
+  },
+  'click .button_delete-automaton' : function() {
+    if(confirm("Are you sure you want to delete this automaton?")) {
+      Graphs.remove({'_id':Session.get('activeGraph')});
+      Session.set('activeGraph',null);
+    }
   }
 });
 

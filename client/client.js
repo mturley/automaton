@@ -47,6 +47,10 @@ Template.body.activeGraph = function() {
   return Graphs.findOne({'_id':Session.get('activeGraph')});
 };
 
+Template.body.numSavedAutomata = function() {
+  return Graphs.count({'_id':Session.get('activeGraph')});
+};
+
 Template.body.events({
   'click .button_new-automaton' : function() {
     fn.setActiveGraph(Graphs.insert({

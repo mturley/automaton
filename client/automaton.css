@@ -66,3 +66,18 @@ h2.editable-title .content.editing {
   padding: 3px;
   border: 1px solid gray;
 }
+
+#render-pane {
+  border: 2px dashed black;
+  background-color: white;
+  width: 400px;
+  height: 50px;
+  margin: 40px;
+  padding: 100px;
+  text-align: center;
+}
+
+#edit-pane div {
+  float: left;
+  width: 50%;
+}

@@ -15,6 +15,7 @@ var Router = new UrlRouter;
 var fn = {
   setActiveGraph : function(graph_id) {
     Session.set('activeGraph',graph_id);
+    Session.set('editMode',true);
     if(graph_id == null) {
       Router.navigate('');
     } else {
@@ -28,26 +29,24 @@ Meteor.startup(function() {
   $('#confirm-delete-dialog').modal({ backdrop: true, show: false });
 });
 
-// Meteor.subscribe calls go in here
-
 Template.body.myautomata = function() {
   return Graphs.find({'owner' : Meteor.userId()});
 };
-
 Template.body.isActiveGraph = function() {
   return this._id == Session.get('activeGraph');
 };
-
 Template.body.activeGraphExists = function() {
   return Session.get('activeGraph') != null;
 };
-
-Template.body.activeGraph = function() {
-  return Graphs.findOne({'_id':Session.get('activeGraph')});
-};
-
 Template.body.numSavedAutomata = function() {
   return Graphs.find({'_id':Session.get('activeGraph')}).count();
+};
+
+Template.graphEditor.activeGraph = function() {
+  return Graphs.findOne({'_id':Session.get('activeGraph')});
+};
+Template.graphEditor.editMode = function() {
+  return Session.get('editMode');
 };
 
 Template.body.events({
@@ -70,7 +69,10 @@ Template.body.events({
   'click #myautomata li .delete-icon' : function() {
     Session.set('dialogContextGraph', this._id)
     $('#confirm-delete-dialog').modal('show');
-  },
+  }
+});
+
+Template.graphEditor.events({
   'click .editable-title' : function() {
     var $titleBox = $('.editable-title .content');
     $titleBox.addClass('editing').attr('contenteditable','true');
@@ -78,15 +80,23 @@ Template.body.events({
     var saveTitle = function() {
       $titleBox.off('blur.editing keyup.editing');
       $titleBox.removeClass('editing').removeAttr('contenteditable');
+      var oldTitle = Graphs.findOne({ '_id' : Session.get('activeGraph') }).title;
       var title = $titleBox.text();
-      Graphs.update({ '_id' : Session.get('activeGraph') },{ 'title' : title });
+      if(title !== '') {
+        Graphs.update({ '_id' : Session.get('activeGraph') },{ 'title' : title });
+      } else {
+        $titleBox.html(oldTitle);
+      }
     }
     $titleBox.on('blur.editing', saveTitle);
     $titleBox.on('keyup.editing', function(event) {
       if(event.keyCode === 13) saveTitle();
     });
+  },
+  'click #toggle-edit-mode' : function() {
+    Session.set('editMode', !Session.get('editMode'));
   }
-});
+})
 
 Template.hiddenElements.events({
   'click #confirm-delete-dialog .btn-danger' : function() {

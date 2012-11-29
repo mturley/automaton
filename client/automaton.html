@@ -22,11 +22,6 @@
   <div class="navbar navbar-inverse navbar-fixed-top">
     <div class="navbar-inner">
       <div class="container-fluid">
-        <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-        </a>
         <a class="brand" href="/">Deterministic Finite Automaton Simulator</a>
         <div class="nav-collapse collapse">
           <p class="navbar-text pull-right">
@@ -65,11 +60,7 @@
       <div class="span9">
         <div class="hero-unit" align="center">
           {{#if activeGraphExists}}
-            <h2 class="editable-title">
-              <span class="content">{{activeGraph.title}}</span>
-              <i class="edit-icon" title="Rename"></i>
-            </h2>
-            <br />
+            {{> graphEditor}}
           {{else}}
             <h1>Welcome!</h1>
             <br><br>
@@ -90,18 +81,55 @@
   </div><!--/.fluid-container-->
 </template>
 
+<template name="graphEditor">
+  <h2 class="editable-title">
+    <span class="content">{{activeGraph.title}}</span>
+    <i class="edit-icon" title="Rename"></i>
+  </h2>
+  <div id="render-pane">
+    Close your eyes and imagine a beautifully rendered graph in this box.  Isn't that nice?
+  </div>
+  {{#if editMode}}
+    <div id="edit-pane">
+      <div class="leftcol">
+        Vertices / State Nodes
+        <br /><br /><br /><br /><br /><br /><br />
+      </div>
+      <div class="rightcol">
+        Edges / Transitions
+        <br /><br /><br /><br /><br /><br /><br />
+      </div>
+    </div>
+  {{/if}}
+  <button id="toggle-edit-mode" class="btn btn-primary btn-large">
+    {{#if editMode}}
+      &nbsp;&nbsp;&nbsp;&nbsp;Proceed to Simulator &raquo;&nbsp;&nbsp;&nbsp;&nbsp;
+    {{else}}
+      &nbsp;&nbsp;&nbsp;&nbsp;&laquo; Back to Editor&nbsp;&nbsp;&nbsp;&nbsp;
+    {{/if}}
+  </button>
+  {{#unless editMode}}
+    <div id="simulate-pane">
+      <br /><br /><br /><br />
+      TODO: Simulator Controls Here!
+      <br /><br /><br /><br />
+    </div>
+  {{/unless}}
+  <br />
+</template>
+
 <template name="hiddenElements">
   <div id="confirm-delete-dialog" class="modal hide fade">
     <div class="modal-header">
       <h3>Delete Automaton</h3>
     </div>
     <div class="modal-body">
-      <p>You are about to delete a saved automaton.  This is irreversible.</p>
-      <p>Do you want to proceed?</p>
+      <p>You are about to delete a saved automaton and all of its associated data.</p>
+      <p>This is irreversible. Do you want to proceed?</p>
     </div>
     <div class="modal-footer">
-      <a href="#" class="btn btn-danger">Yes, Delete this Automaton</a>
-      <a href="#" class="btn btn-secondary">No</a>
+      <button class="btn btn-danger">Yes, Delete this Automaton</a>
+      <button class="btn btn-secondary">No</a>
     </div>
   </div>
 </template>

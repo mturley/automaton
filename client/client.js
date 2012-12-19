@@ -35,13 +35,15 @@ var fn = {
     }
     var el;
     if(Raphael && $("#render-pane").length === 1 && graphObj != undefined) {
+      $("#render-pane").empty();
+
       var redraw, g, renderer, layouter;
       var width = graphObj.width;
       var height = graphObj.height;
       g = new Graph();
       g.addNode("strawberry");
       g.addNode("cherry");
-      g.addNode("1", { label : "Tomato" });
+      g.addNode("1", { label : "START" });
       var st = {
         directed: true,
         label: "EdgeLabel!",

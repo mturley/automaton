@@ -68,12 +68,114 @@ var fn = {
     } else {
       console.log("Tried to render before canvas element existed!");
     }
+  },
+  simulateInit : function(inputstr) {
+    var gid, s, startNode;
+    gid = Session.get('activeGraph');
+    s = Vertices.find({ graph_id : gid, 'colors.start' : true });
+    if(s.count() !== 1) {
+      alert("ERROR: simulateInit was called on a DFA which does not have exactly one start node.  Aborting.");
+      return;
+    }
+    startNode = s.fetch()[0];
+    Simulations.remove({}); // WARNING: destroys all old simulation data.
+    // if we ever want a browsable simulation history, remove the above line.
+    Session.set('activeSimulation', Simulations.insert({
+      graph_id     : gid,
+      inputString  : inputstr,
+      currentIndex : 0,
+      currentState : startNode._id,
+      complete     : false,
+      accepted     : false,
+      aborted      : false,
+      history      : []
+    }));
+  },
+  simulateStep : function() {
+    // returns true if done simulating, false otherwise.
+    var sim, cur, idx, ch, e, edge, newStateObj, stepObj;
+    var isComplete = false, isAccepted = false, isAborted = false;
+    sim = Simulations.findOne(Session.get('activeSimulation'));
+    cur = sim.currentState;
+    if(!sim || !sim.hasOwnProperty('currentState')) {
+      alert("ERROR: simulateStep was called while activeSimulation was invalid.  Aborting.");
+      return true;
+    }
+    // grab the next character to read
+    idx = sim.currentIndex;
+    ch = sim.inputString[idx];
+    // look for a matching transition
+    e = Edges.find({
+      graph_id    : sim.graph_id,
+      fromvert_id : cur,
+      label       : ch
+    });
+    if(e.count() === 0) {
+      // no edge to follow!  reject string and complete simulation.
+      stepObj = {
+        index     : idx,
+        oldState  : sim.currentState,
+        inputChar : ch,
+        newState  : null,
+        atStart   : false,
+        atFinal   : false
+      };
+      isComplete = true;
+    } else if(e.count() > 1) {
+      alert("More than one edge to follow!  Currently the simulator does not support NFAs.  Aborting.");
+      stepObj = {
+        index     : idx,
+        oldState  : sim.currentState,
+        inputChar : ch,
+        newState  : null,
+        atStart   : false,
+        atFinal   : false
+      };
+      isComplete = true;
+      isAborted = true;
+    } else {
+      // we have a valid edge to follow!
+      edge = e.fetch()[0];
+      newStateObj = Vertices.findOne(edge.tovert_id);
+      cur = newStateObj._id;
+      stepObj = {
+        index     : idx,
+        oldState  : sim.currentState,
+        inputChar : ch,
+        newState  : cur,
+        atStart   : newStateObj.colors['start'],
+        atFinal   : newStateObj.colors['final']
+      };
+      if(idx+1 >= sim.inputString.length) {
+        // we've reached the end of our input.
+        isComplete = true;
+        isAccepted = stepObj.atFinal;
+      }
+    }
+    Simulations.update(sim._id, { $set : {
+      currentIndex : idx+1,
+      currentState : cur,
+      complete     : isComplete,
+      accepted     : isAccepted,
+      aborted      : isAborted
+    }});
+    if(stepObj !== undefined) {
+      Simulations.update(sim._id, { $push : {
+        history : stepObj
+      }});
+    }
+    return isComplete;
+  },
+  simulateAll : function() {
+    while(!fn.simulateStep()) {}
+    console.log("finished test simulation: ",Simulations.findOne(Session.get('activeSimulation')));
   }
 };
 
 Meteor.startup(function() {
   Backbone.history.start({ pushState: true })
   $('#confirm-delete-dialog').modal({ backdrop: true, show: false });
+  Session.set('activeSimulation', null);
 });
 
 Template.body.myautomata = function() {
@@ -237,7 +339,12 @@ Template.graphEditor.events({
       alert("I politely refuse to attempt simulation of a DFA without exactly one start state!");
     } else {
       Session.set('editMode', !editing);
+      Session.set('activeSimulation', null);
     }
+  },
+  'click #do-simulate' : function() {
+    var str = $('#string-input').val();
+    if(str.length > 0) fn.simulateInit(str);
   }
 });
 Template.graphEditor.rendered = function() {
@@ -251,6 +358,43 @@ Template.graphEditor.vertices = function() {
 Template.graphEditor.edges = function() {
   return Edges.find({ 'graph_id' : Session.get('activeGraph') },
     { sort: {fromvert_id: 1}});
+};
+
+Template.simulationResults.events({
+  'click #sim-step' : function() {
+    fn.simulateStep();
+  },
+  'click #sim-all' : function() {
+    fn.simulateAll();
+  }
+});
+Template.simulationResults.simulating = function() {
+  return Session.get('activeSimulation') !== null;
+};
+Template.simulationResults.history = function() {
+  return Simulations.findOne(Session.get('activeSimulation'))['history'];
+};
+Template.simulationResults.oldState_label = function() {
+  var vertid = this.oldState;
+  if(vertid === null) return '--';
+  return Vertices.findOne(vertid).label;
+};
+Template.simulationResults.newState_label = function() {
+  var vertid = this.newState;
+  if(vertid === null) return '--';
+  return Vertices.findOne(vertid).label;
+};
+Template.simulationResults.inputString = function() {
+  return Simulations.findOne(Session.get('activeSimulation'))['inputString'];
+}
+Template.simulationResults.incomplete = function() {
+  return !Simulations.findOne(Session.get('activeSimulation'))['complete'];
+};
+Template.simulationResults.aborted = function() {
+  return Simulations.findOne(Session.get('activeSimulation'))['aborted'];
+};
+Template.simulationResults.accepted = function() {
+  return Simulations.findOne(Session.get('activeSimulation'))['accepted'];
 };
 
 Template.hiddenElements.events({

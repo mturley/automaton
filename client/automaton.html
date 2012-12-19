@@ -94,7 +94,8 @@
   <div style="margin: 10px;">
     Graph looking funky?
     <button class="btn" id="force-redraw">Force Redraw</button>
-    and if that doesn't work, try refreshing the page.
+    and if that doesn't work, try refreshing the page.<br />
+    <span style="color: red;">NOTE: The graph rendering is severely broken and will eventually be replaced.</span>
   </div>
   {{#if editMode}}
     <div id="edit-pane">
@@ -147,10 +148,56 @@
     <div id="controls-container">
       <h4>Enter a string to see if this DFA accepts it!</h4>
       <input type="text" id="string-input" size="10" />
-      <button class="btn btn-primary" id="do-simulate">GO!</button>
+      <button class="btn btn-primary" id="do-simulate">Initialize...</button>
     </div>
+    {{> simulationResults}}
   {{/unless}}
   <br />
+</template>
+
+<template name="simulationResults">
+  {{#if simulating}}
+    {{#if incomplete}}
+      <div style="margin: 10px;">
+        Click to Simulate:
+        <button id="sim-step" class="btn btn-primary">One Step &raquo;</button>
+        <button id="sim-all"  class="btn btn-primary">All Steps &raquo;</button>
+      </div>
+    {{/if}}
+    <table id="sim-results">
+        <tr>
+          <th>Step #</th>
+          <th>From State</th>
+          <th>Input</th>
+          <th>To State</th>
+          <th>At Final?</th>
+        </tr>
+      {{#each history}}
+        <tr>
+          <td>{{index}}</td>
+          <td>{{oldState_label}}</td>
+          <td>"{{inputChar}}"</td>
+          <td>{{newState_label}}</td>
+          <td>{{atFinal}}</td>
+        </tr>
+      {{/each}}
+    </table>
+    <br />
+    <div>
+      {{#unless incomplete}}
+        <h3>Simulation Results:</h3>
+        {{#if aborted}}
+          <h4 style="color: red;">[simulation was aborted before completion]</h4>
+        {{else}}
+          {{#if accepted}}
+            <h4 style="color: green;">The string "{{inputString}}" was ACCEPTED by this DFA!</h4>
+          {{else}}
+            <h4 style="color: red;">The string "{{inputString}}" was NOT ACCEPTED by this DFA!</h4>
+          {{/if}}
+        {{/if}}
+      {{/unless}}
+    </div>
+  {{/if}}
 </template>
 
 <template name="hiddenElements">

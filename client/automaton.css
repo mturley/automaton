@@ -109,3 +109,18 @@ h2.editable-title .content.editing {
 #edit-pane i.delete:active {
   opacity: 1.0;
 }
+
+#do-simulate{
+  position: relative;
+  top: -5px;
+}
+#sim-results {
+  border-collapse: collapse;
+}
+#sim-results, #sim-results th, #sim-results td {
+  border: 1px solid black;
+  background: #FFF;
+  text-align: center;
+  padding: 5px;
+  font-size: 18px;
+}

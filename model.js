@@ -30,20 +30,23 @@ Edges = new Meteor.Collection("edges");
 Simulations = new Meteor.Collection("simulations");
 /* Example Simulation object: {
   'graph_id'     : <graph_id>,
-  'input'        : '10010101001',
+  'inputString'  : '10010101001',
   'currentIndex' : 3
   'currentState' : <vertex_id>,
-  'history' : [
+  'complete'     : false,
+  'accepted'     : false,
+  'aborted'      : false,
+  'history' : [  
     {
+      'index'      : 0
       'oldState'   : null,
-      'inputIndex' : 0,
       'inputChar'  : '1',
       'newState'   : <vertex_id>,
       'atStart'    : true,
       'atFinal'    : false
     }, {
+      'index'      : 1
       'oldState'   : null,
-      'inputIndex' : 1,
       'inputChar'  : '0',
       'newState'   : <vertex_id>,
       'atStart'    : false,

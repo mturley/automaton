@@ -91,15 +91,46 @@
       <div id="render-pane"></div>
     {{/constant}}
   </div>
+  <div style="margin: 10px;">
+    Graph looking funky?
+    <button class="btn" id="force-redraw">Force Redraw</button>
+    and if that doesn't work, try refreshing the page.
+  </div>
   {{#if editMode}}
     <div id="edit-pane">
       <div class="leftcol">
-        Vertices / State Nodes
-        <br /><br /><br /><br /><br /><br /><br />
+        <h4>Vertices / State Nodes</h4>
+        <br />
+        <ul>
+          {{#each vertices}}
+            <li>
+              <strong>{{label}}</strong> :
+              Start: <strong>{{colors.start}}</strong>
+              Final: <strong>{{colors.final}}</strong>
+            </li>
+          {{/each}}
+        </ul>
+        <br />
+        <button id="add-vertex" class="btn">
+          Add State
+        </button>
       </div>
       <div class="rightcol">
-        Edges / Transitions
-        <br /><br /><br /><br /><br /><br /><br />
+        <h4>Edges / Transitions</h4>
+        <br />
+        <ul>
+          {{#each edges}}
+            <li>
+              When at <strong>{{fromvert_label}}</strong>
+              and read "<strong>{{label}}</strong>",
+              move to <strong>{{tovert_label}}</strong>
+            </li>
+          {{/each}}
+        </ul>
+        <br />
+        <button id="add-edge" class="btn">
+          Add Transition
+        </button>
       </div>
     </div>
   {{/if}}

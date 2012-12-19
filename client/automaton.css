@@ -75,7 +75,17 @@ h2.editable-title .content.editing {
   height: 100%;
 }
 
+#edit-pane {
+  margin: 10px;
+  overflow: hidden;
+}
 #edit-pane div {
   float: left;
   width: 50%;
 }
+#edit-pane ul {
+  list-style-type: none;
+  font-size: 14px;
+}
+
+

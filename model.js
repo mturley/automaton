@@ -13,19 +13,18 @@ Vertices = new Meteor.Collection("vertices");
   'label'    : 'p',
   'colors'   : {
     'start' : true,
-    'final' : false,
-  },
-  'xpos' : 35,
-  'ypos' : 35
+    'final' : false
+  }
 } */
 Edges = new Meteor.Collection("edges");
 /* Example Edge Object: {
-  'graph_id'    : <graph_id>,
-  'directed'    : true,
-  'fromvert_id' : <vertex_id>,
-  'tovert_id'   : <vertex_id>,
-  'label'       : '1',
-  'positioning' : 'direct'
+  'graph_id'       : <graph_id>,
+  'directed'       : true,
+  'fromvert_label' : <string>,
+  'fromvert_id'    : <vertex_id>,
+  'tovert_label'   : <string>,
+  'tovert_id'      : <vertex_id>,
+  'label'          : '1'
 } */
 
 Simulations = new Meteor.Collection("simulations");

@@ -30,36 +30,41 @@ var fn = {
     //    (and retain the raphael object for reuse)
     // 2. when the graph is re-rendered, instead of emptying the render pane,
     //    just clear the raphael canvas and start over from there.
+    var gid;
     if(graphObj == undefined) {
-      graphObj = Graphs.findOne({'_id':Session.get('activeGraph')});
+      gid = Session.get('activeGraph');
+      graphObj = Graphs.findOne({'_id': gid});
+    } else {
+      gid = graphObj._id;
     }
-    var el;
     if(Raphael && $("#render-pane").length === 1 && graphObj != undefined) {
-      $("#render-pane").empty();
+      $("#render-pane").empty(); // this shouldn't be necessary... FIXME!
 
       var redraw, g, renderer, layouter;
       var width = graphObj.width;
       var height = graphObj.height;
       g = new Graph();
-      g.addNode("strawberry");
-      g.addNode("cherry");
-      g.addNode("1", { label : "START" });
-      var st = {
-        directed: true,
-        label: "EdgeLabel!",
-        "label-style" : {
-          "font-size": 18
-        }
-      };
-      g.addEdge("strawberry", "cherry", st);
-      g.addEdge("strawberry", "1");
+
+      $.each(Vertices.find({ graph_id : gid }).fetch(), function(i, vertex) {
+        var lbl = vertex.label;
+        if(vertex.colors['start']) lbl += ' [START]';
+        if(vertex.colors['final']) lbl += ' [FINAL]';
+        g.addNode(vertex._id, { label : lbl });
+      });
+      $.each(Edges.find({ graph_id : gid }).fetch(), function(i, edge) {
+        g.addEdge(edge.fromvert_id, edge.tovert_id, {
+          directed: true,
+          label: edge.label,
+          "label-style" : {
+            "font-size" : 16
+          }
+        });
+      });
+
       layouter = new Graph.Layout.Spring(g);
       renderer = new Graph.Renderer.Raphael('render-pane', g, width, height);
-      redraw = function() {
-        layouter.layout();
-        renderer.draw();
-      };
-      redraw();
+      layouter.layout();
+      renderer.draw();
     } else {
       console.log("Tried to render before canvas element existed!");
     }
@@ -87,7 +92,7 @@ Template.body.numSavedAutomata = function() {
 Template.graphEditor.activeGraph = function() {
   var graph = Graphs.findOne({'_id':Session.get('activeGraph')});
   // fn.renderGraph(graph);
-  // may need this to get raphael to acknowledge switching graphs
+  // may need this to get dracula to acknowledge switching graphs
   return graph;
 };
 Template.graphEditor.editMode = function() {
@@ -97,12 +102,12 @@ Template.graphEditor.editMode = function() {
 Template.body.events({
   'click .button_new-automaton' : function() {
     fn.setActiveGraph(Graphs.insert({
-      'type'          : 'automaton',
-      'deterministic' : 'false',
-      'owner'         : Meteor.userId(),
-      'title'         : 'Untitled Automaton',
-      'width'         : 640,
-      'height'        : 300
+      type          : 'automaton',
+      deterministic : 'false',
+      owner         : Meteor.userId(),
+      title         : 'Untitled Automaton',
+      width         : 640,
+      height        : 300
     }));
   },
   'click #myautomata li a' : function(event) {
@@ -130,7 +135,7 @@ Template.graphEditor.events({
       var oldTitle = Graphs.findOne({ '_id' : Session.get('activeGraph') }).title;
       var title = $titleBox.text();
       if(title !== '') {
-        Graphs.update({ '_id' : Session.get('activeGraph') },{ 'title' : title });
+        Graphs.update({ '_id' : Session.get('activeGraph') },{ $set: {'title' : title }});
       } else {
         $titleBox.html(oldTitle);
       }
@@ -140,13 +145,75 @@ Template.graphEditor.events({
       if(event.keyCode === 13) saveTitle();
     });
   },
+  'click #force-redraw' : function() {
+    fn.renderGraph();
+  },
+  'click #add-vertex' : function() {
+    var gid = Session.get('activeGraph');
+    var num = Vertices.find({ 'graph_id' : gid }).count();
+    // TODO account for deleted vertices?  just reorder them?
+    Vertices.insert({
+      graph_id : gid,
+      label    : 'v'+num, // TODO allow for actual labels
+      colors   : {
+        'start' : false,
+        'final' : false
+      }
+    });
+    fn.renderGraph();
+  },
+  'click #add-edge'   : function() {
+    var gid, isValidVertex, qFrom, qTo, err, vFrom, vTo, isValidChar, qChar, transChar;
+    gid = Session.get('activeGraph');
+    isValidVertex = function(str) {
+      return str !== null && Vertices.find({ graph_id: gid, label: str }).count() === 1;
+    };
+    qFrom = "Which state should this transition lead OUT OF? (i.e. v1 for vertex 1)";
+    qTo = "Which state should this transition lead INTO?  (i.e. v1 for vertex 1)";
+    err = "That's not a valid vertex label in this graph!  Try again.";
+    while(!isValidVertex(vFrom = prompt(qFrom))) {
+      if(vFrom === null) return;
+      alert(err);
+    }
+    while(!isValidVertex(vTo = prompt(qTo))) {
+      if(vTo === null) return;
+      alert(err);
+    }
+    isValidChar = function(str) {
+      return str !== null && str.length === 1
+        && Edges.find({ graph_id : gid, label: str, fromvert_label: vFrom }).count() === 0;
+    }
+    qChar = "Finally, what character from the language should the DFA accept for this transition from "+vFrom+" to "+vTo+"?";
+    while(!isValidChar(transChar = prompt(qChar))) {
+      if(transChar === null) return;
+      alert("Invalid input: please enter exactly one character, and be sure there isn't already a transition from "+vFrom+" using that character.");
+    }
+    Edges.insert({
+      graph_id       : gid,
+      directed       : true,
+      fromvert_label : vFrom,
+      fromvert_id    : Vertices.findOne({ graph_id: gid, label: vFrom })._id,
+      tovert_label   : vTo,
+      tovert_id      : Vertices.findOne({ graph_id: gid, label: vTo })._id,
+      label          : transChar
+    });
+    fn.renderGraph();
+  },
   'click #toggle-edit-mode' : function() {
     Session.set('editMode', !Session.get('editMode'));
   }
 });
 Template.graphEditor.rendered = function() {
   console.log("GRAPHEDITOR TEMPLATE WAS RENDERED!");
+  // TODO do we really have to re-render the entire graph when the template changes?
   fn.renderGraph();
+};
+Template.graphEditor.vertices = function() {
+  return Vertices.find({ 'graph_id' : Session.get('activeGraph') });
+};
+Template.graphEditor.edges = function() {
+  return Edges.find({ 'graph_id' : Session.get('activeGraph') },
+    { sort: {fromvert_id: 1}});
 };
 
 Template.hiddenElements.events({

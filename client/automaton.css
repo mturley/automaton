@@ -70,11 +70,9 @@ h2.editable-title .content.editing {
 #render-pane {
   border: 2px dashed black;
   background-color: white;
-  width: 400px;
-  height: 50px;
-  margin: 40px;
-  padding: 100px;
-  text-align: center;
+  padding: 0px;
+  width: 100%;
+  height: 100%;
 }
 
 #edit-pane div {

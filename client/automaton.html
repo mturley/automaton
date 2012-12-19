@@ -86,8 +86,10 @@
     <span class="content">{{activeGraph.title}}</span>
     <i class="edit-icon" title="Rename"></i>
   </h2>
-  <div id="render-pane">
-    Close your eyes and imagine a beautifully rendered graph in this box.  Isn't that nice?
+  <div style="width: {{activeGraph.width}}px; height: {{activeGraph.height}}px;">
+    {{#constant}}
+      <div id="render-pane"></div>
+    {{/constant}}
   </div>
   {{#if editMode}}
     <div id="edit-pane">
@@ -109,7 +111,7 @@
     {{/if}}
   </button>
   {{#unless editMode}}
-    <div id="simulate-pane">
+    <div id="controls-container">
       <br /><br /><br /><br />
       TODO: Simulator Controls Here!
       <br /><br /><br /><br />

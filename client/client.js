@@ -21,6 +21,56 @@ var fn = {
     } else {
       Router.navigate('edit/'+graph_id);
     }
+  },
+  renderGraph : function(graphObj) {
+    // TODO FIXME
+    // right now the graph must be re-rendered whenever its data changes,
+    // which is fine, except re-rendering removes and recreates the entire element.
+    // 1. move the raphael init stuff to a handler for Template.rendered
+    //    (and retain the raphael object for reuse)
+    // 2. when the graph is re-rendered, instead of emptying the render pane,
+    //    just clear the raphael canvas and start over from there.
+    if(graphObj == undefined) {
+      graphObj = Graphs.findOne({'_id':Session.get('activeGraph')});
+    }
+    var el;
+    if(Raphael && $("#render-pane").length === 1 && graphObj != undefined) {
+      $("#render-pane").empty();
+      var dragger = function () {
+        this.ox = this.type == "rect" ? this.attr("x") : this.attr("cx");
+        this.oy = this.type == "rect" ? this.attr("y") : this.attr("cy");
+        this.animate({"fill-opacity": .2}, 500);
+      },
+      move = function (dx, dy) {
+        var att = this.type == "rect" ? {x: this.ox + dx, y: this.oy + dy} : {cx: this.ox + dx, cy: this.oy + dy};
+        this.attr(att);
+        for (var i = connections.length; i--;) {
+          r.connection(connections[i]);
+        }
+        r.safari();
+      },
+      up = function () {
+        this.animate({"fill-opacity": 0}, 500);
+      },
+      r = Raphael("render-pane", graphObj.width, graphObj.height),
+      connections = [],
+      shapes = [
+        r.ellipse(190, 100, 30, 20),
+        r.rect(290, 80, 60, 40, 10),
+        r.rect(290, 180, 60, 40, 2),
+        r.ellipse(450, 100, 20, 20)
+      ];
+      for (var i = 0, ii = shapes.length; i < ii; i++) {
+        var color = Raphael.getColor();
+        shapes[i].attr({fill: color, stroke: color, "fill-opacity": 0, "stroke-width": 2, cursor: "move"});
+        shapes[i].drag(move, dragger, up);
+      }
+      connections.push(r.connection(shapes[0], shapes[1], "#000"));
+      connections.push(r.connection(shapes[1], shapes[2], "#000", "#000|5"));
+      connections.push(r.connection(shapes[1], shapes[3], "#000", "#000"));
+    } else {
+      console.log("Tried to render before canvas element existed!");
+    }
   }
 };
 
@@ -43,7 +93,10 @@ Template.body.numSavedAutomata = function() {
 };
 
 Template.graphEditor.activeGraph = function() {
-  return Graphs.findOne({'_id':Session.get('activeGraph')});
+  var graph = Graphs.findOne({'_id':Session.get('activeGraph')});
+  // fn.renderGraph(graph);
+  // may need this to get raphael to acknowledge switching graphs
+  return graph;
 };
 Template.graphEditor.editMode = function() {
   return Session.get('editMode');
@@ -55,7 +108,9 @@ Template.body.events({
       'type'          : 'automaton',
       'deterministic' : 'false',
       'owner'         : Meteor.userId(),
-      'title'         : 'Untitled Automaton'
+      'title'         : 'Untitled Automaton',
+      'width'         : 640,
+      'height'        : 300
     }));
   },
   'click #myautomata li a' : function(event) {
@@ -96,7 +151,11 @@ Template.graphEditor.events({
   'click #toggle-edit-mode' : function() {
     Session.set('editMode', !Session.get('editMode'));
   }
-})
+});
+Template.graphEditor.rendered = function() {
+  console.log("GRAPHEDITOR TEMPLATE WAS RENDERED!");
+  fn.renderGraph();
+};
 
 Template.hiddenElements.events({
   'click #confirm-delete-dialog .btn-danger' : function() {

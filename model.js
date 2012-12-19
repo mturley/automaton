@@ -4,6 +4,8 @@ Graphs = new Meteor.Collection("graphs");
   'deterministic' : false,
   'owner'         : <user account id>,
   'title'         : 'My First Automaton'
+  'width'         : 640,
+  'height'        : 300
 }  */
 Vertices = new Meteor.Collection("vertices");
 /* Example Vertex Object: {

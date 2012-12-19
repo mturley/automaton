@@ -199,8 +199,45 @@ Template.graphEditor.events({
     });
     fn.renderGraph();
   },
+  'click #edit-pane li.vert a.start' : function() {
+    var vertid = this._id;
+    var newval = !this.colors.start;
+    if(newval && Vertices.find({
+        graph_id : Session.get('activeGraph'),
+        'colors.start' : true }).count() > 0) {
+      alert("Error: There must only be one start state at a time!");
+      return;
+    }
+    Vertices.update(vertid, { $set: { 'colors.start' : newval }});
+  },
+  'click #edit-pane li.vert a.final' : function() {
+    var vertid = this._id;
+    var newval = !this.colors.final;
+    Vertices.update(vertid, { $set: { 'colors.final' : newval }});
+  },
+  'click #edit-pane li.vert i.delete' : function() {
+    var vertid = this._id;
+    var selector = { $or: [{fromvert_id : vertid}, {tovert_id : vertid}] };
+    var numEdges = Edges.find(selector).count();
+    if(numEdges > 0 && !confirm("This vertex has "+numEdges+" incident edges!  Removing this vertex will also remove all associated transitions in and out of this vertex.  Are you sure you want to do that?")) {
+      return;
+    }
+    if(numEdges > 0) Edges.remove(selector);
+    Vertices.remove(vertid);
+  },
+  'click #edit-pane li.edge i.delete' : function() {
+    Edges.remove(this._id);
+  },
   'click #toggle-edit-mode' : function() {
-    Session.set('editMode', !Session.get('editMode'));
+    var editing = Session.get('editMode');
+    var gid = Session.get('activeGraph');
+    if(editing && Vertices.find({
+      graph_id: gid, 'colors.start': true
+    }).count() !== 1) {
+      alert("I politely refuse to attempt simulation of a DFA without exactly one start state!");
+    } else {
+      Session.set('editMode', !editing);
+    }
   }
 });
 Template.graphEditor.rendered = function() {

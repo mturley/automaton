@@ -87,5 +87,25 @@ h2.editable-title .content.editing {
   list-style-type: none;
   font-size: 14px;
 }
-
-
+#edit-pane a {
+  cursor: pointer;
+  text-decoration: underline;
+}
+#edit-pane i.delete {
+  background: url('/img/glyphicons_016_bin.png');
+  background-size: 12px 18px;
+  width: 12px;
+  float: right;
+  position: relative;
+  top: 8px;
+  left: -20px;
+  height: 18px;
+  opacity: 0.5;
+  cursor: pointer;
+}
+#edit-pane i.delete:hover {
+  opacity: 0.8;
+}
+#edit-pane i.delete:active {
+  opacity: 1.0;
+}
